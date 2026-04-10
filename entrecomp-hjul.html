@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EntreComp – Entreprenørielle ferdigheter</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #f5f4f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+    color: #1a1a1a;
+  }
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+    color: #1a1a1a;
+  }
+  .subtitle {
+    font-size: 0.85rem;
+    color: #777;
+    margin-bottom: 1.5rem;
+  }
+  #wheel-wrap {
+    width: 100%;
+    max-width: 560px;
+  }
+  svg { display: block; width: 100%; height: auto; }
+  .seg { cursor: pointer; transition: opacity 0.15s; }
+  .seg:hover path.seg-fill { opacity: 0.75; }
+  .seg.active path.seg-fill { opacity: 1; filter: brightness(1.06); }
+
+  #info-panel {
+    margin-top: 1.25rem;
+    padding: 1.25rem 1.5rem;
+    background: #fff;
+    border-radius: 14px;
+    border: 1.5px solid #e0ddd6;
+    width: 100%;
+    max-width: 560px;
+    min-height: 90px;
+    transition: border-color 0.2s;
+  }
+  #info-panel h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+  #info-panel p {
+    font-size: 0.88rem;
+    color: #555;
+    line-height: 1.6;
+  }
+  #legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    width: 100%;
+    max-width: 560px;
+  }
+  .leg-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1.5px solid #ccc;
+    overflow: hidden;
+  }
+  .leg-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.6rem 1rem;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .leg-dot-lg {
+    width: 14px; height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,0.4);
+  }
+  .leg-text {
+    font-size: 0.84rem;
+    color: #555;
+    line-height: 1.6;
+    padding: 0.65rem 1rem;
+  }
+  .leg-text strong {
+    color: #222;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<h1>Entreprenørielle ferdigheter</h1>
+<p class="subtitle">EntreComp-rammeverket — klikk på et segment for å lese mer</p>
+
+<div id="wheel-wrap">
+  <svg id="ew" viewBox="0 0 560 560" role="img">
+    <title>EntreComp – Entrepreneurship Competence Wheel</title>
+    <desc>Interaktivt hjul som viser 15 kompetanseområder fordelt på tre kategorier.</desc>
+  </svg>
+</div>
+
+<div id="info-panel">
+  <h3 id="ip-title" style="color:#888">Klikk på et segment</h3>
+  <p id="ip-desc">Utforsk de 15 kompetanseområdene i EntreComp-rammeverket for entreprenørielle ferdigheter.</p>
+</div>
+
+<div id="legend">
+  <div class="leg-card" style="border-color:#c05a30">
+    <div class="leg-header" style="background:#c05a30">
+      <div class="leg-dot-lg" style="background:#f7d4be"></div>
+      Idéer og muligheter
+    </div>
+    <p class="leg-text">Kompetanser knyttet til å <strong>oppdage, skape og vurdere ideer</strong>. Her handler det om å se muligheter der andre ikke ser dem, tenke kreativt og ha en etisk og bærekraftig tilnærming.</p>
+  </div>
+  <div class="leg-card" style="border-color:#1d6e4b">
+    <div class="leg-header" style="background:#1d6e4b">
+      <div class="leg-dot-lg" style="background:#b5e4d0"></div>
+      Ressurser
+    </div>
+    <p class="leg-text">Kompetanser knyttet til å <strong>kjenne seg selv og mobilisere det man trenger</strong>. Selvinnsikt, motivasjon, økonomiforståelse og evnen til å engasjere andre mennesker og ressurser.</p>
+  </div>
+  <div class="leg-card" style="border-color:#2b4fa0">
+    <div class="leg-header" style="background:#2b4fa0">
+      <div class="leg-dot-lg" style="background:#b8ccf0"></div>
+      Handling
+    </div>
+    <p class="leg-text">Kompetanser knyttet til å <strong>omsette ideer til praksis</strong>. Ta initiativ, planlegge, håndtere risiko, samarbeide og lære underveis – det å faktisk gjøre noe med ideene sine.</p>
+  </div>
+</div>
+
+<script>
+const cx = 280, cy = 280;
+const R_inner = 68, R_outer = 238, R_ring = 260;
+const TAU = Math.PI * 2;
+
+const areas = [
+  {
+    label: ["Idéer &", "muligheter"],
+    color: "#c05a30",
+    colorLight: "#f7d4be",
+    colorDark: "#6b2e10",
+    segments: [
+      { label: ["Oppdage", "muligheter"], desc: "Å finne muligheter for å skape verdi ved å observere og undersøke omgivelsene, fange opp ideer og behov som andre ikke ser." },
+      { label: ["Kreativitet"], desc: "Å utvikle ideer og bruke fantasi til å vurdere muligheter og gi dem form. Å kombinere kunnskap på nye og overraskende måter." },
+      { label: ["Visjon"], desc: "Å jobbe mot fremtiden: forestille seg og beskrive et ønskelig fremtidsscenario og identifisere konkrete mål å strekke seg mot." },
+      { label: ["Verdsette", "ideer"], desc: "Å anerkjenne verdien av ideer og sette pris på viktigheten av kreativitet, estetisk sansing og initiativ som grunnlag for innovasjon." },
+      { label: ["Etisk &", "bærekraftig", "tenkning"], desc: "Å vurdere konsekvenser av ideer og handlinger, og ta ansvar for etiske, sosiale og bærekraftige valg i alt man gjør." }
+    ]
+  },
+  {
+    label: ["Ressurser"],
+    color: "#1d6e4b",
+    colorLight: "#b5e4d0",
+    colorDark: "#0a3d28",
+    segments: [
+      { label: ["Selvinnsikt &", "mestringstro"], desc: "Å kjenne sine egne styrker og svakheter, og tro på sin evne til å lykkes og gjennomføre prosjekter til tross for motgang." },
+      { label: ["Motivasjon &", "utholdenhet"], desc: "Å holde seg fokusert og motivert, ikke gi opp når det møter motstand, og jobbe hardt og målrettet over tid." },
+      { label: ["Mobilisere", "ressurser"], desc: "Å skaffe og forvalte ressurser – penger, materialer, teknologi og tid – for å virkeliggjøre ideer på en effektiv måte." },
+      { label: ["Finansiell &", "økonomisk", "forståelse"], desc: "Å forstå økonomi og finansielle begreper, og bruke denne kunnskapen til å planlegge, budsjettere og ta gode beslutninger." },
+      { label: ["Engasjere", "andre"], desc: "Å inspirere, engasjere og motivere andre til å bidra og hjelpe til med å realisere ideer – bygge allianser og støttespillere." }
+    ]
+  },
+  {
+    label: ["Handling"],
+    color: "#2b4fa0",
+    colorLight: "#b8ccf0",
+    colorDark: "#0e1f5a",
+    segments: [
+      { label: ["Ta initiativ"], desc: "Å sette i gang, gripe muligheter og handle proaktivt uten å vente på at andre skal lede an eller gi tillatelse." },
+      { label: ["Planlegging &", "styring"], desc: "Å sette mål, planlegge steg, organisere prosesser og følge med på fremdrift for å nå resultater innenfor rammer." },
+      { label: ["Håndtere", "usikkerhet", "& risiko"], desc: "Å håndtere usikkerhet og risiko, ta kalkulerte sjanser og tilpasse seg endring og uforutsette hendelser uten å bli lammet." },
+      { label: ["Samarbeide", "med andre"], desc: "Å samarbeide, kommunisere og lede – bygge team og nettverk, løse konflikter og nå felles mål gjennom kollektiv innsats." },
+      { label: ["Lære av", "erfaring"], desc: "Å reflektere over erfaringer, lære av feil og suksesser, og bruke lærdommen aktivt til å vokse og forbedre seg kontinuerlig." }
+    ]
+  }
+];
+
+const areaStart = [-Math.PI/2, -Math.PI/2 + TAU/3, -Math.PI/2 + 2*TAU/3];
+const segAngle = TAU / 15;
+
+function xy(angle, r) {
+  return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+}
+
+function arcPath(a1, a2, r1, r2, gap=0.018) {
+  a1 += gap; a2 -= gap;
+  const [x1,y1] = xy(a1,r1), [x2,y2] = xy(a1,r2);
+  const [x3,y3] = xy(a2,r2), [x4,y4] = xy(a2,r1);
+  const la = (a2-a1) > Math.PI ? 1 : 0;
+  return `M${x1},${y1}L${x2},${y2}A${r2},${r2},0,${la},1,${x3},${y3}L${x4},${y4}A${r1},${r1},0,${la},0,${x1},${y1}Z`;
+}
+
+function ringPath(a1, a2, r1, r2, gap=0.01) {
+  a1 += gap; a2 -= gap;
+  const [x1,y1] = xy(a1,r1),[x2,y2] = xy(a1,r2);
+  const [x3,y3] = xy(a2,r2),[x4,y4] = xy(a2,r1);
+  const la = (a2-a1) > Math.PI ? 1 : 0;
+  return `M${x1},${y1}L${x2},${y2}A${r2},${r2},0,${la},1,${x3},${y3}L${x4},${y4}A${r1},${r1},0,${la},0,${x1},${y1}Z`;
+}
+
+const svg = document.getElementById('ew');
+const ns = 'http://www.w3.org/2000/svg';
+
+function el(tag, attrs={}) {
+  const e = document.createElementNS(ns, tag);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+  return e;
+}
+
+function addText(parent, lines, x, y, {size=11, weight=500, fill='#333', anchor='middle', outline=false}={}) {
+  if (outline) {
+    const bg = el('text', {'text-anchor': anchor, 'dominant-baseline':'central',
+      'font-size': size, 'font-weight': weight, fill:'rgba(0,0,0,0.45)',
+      'stroke':'rgba(0,0,0,0.45)', 'stroke-width':'4', 'stroke-linejoin':'round', 'paint-order':'stroke',
+      'font-family': 'system-ui,-apple-system,sans-serif',
+      'pointer-events':'none'});
+    lines.forEach((line, i) => {
+      const ts = bg.ownerDocument ? bg.ownerDocument.createElementNS('http://www.w3.org/2000/svg','tspan') : document.createElementNS('http://www.w3.org/2000/svg','tspan');
+      ts.setAttribute('x', x); ts.setAttribute('dy', i===0 ? 0 : 13);
+      ts.textContent = line;
+      bg.appendChild(ts);
+    });
+    bg.setAttribute('x', x);
+    bg.setAttribute('y', y - (lines.length-1)*6.5);
+    parent.appendChild(bg);
+  }
+  const t = el('text', {'text-anchor': anchor, 'dominant-baseline':'central',
+    'font-size': size, 'font-weight': weight, fill,
+    'font-family': 'system-ui,-apple-system,sans-serif',
+    'pointer-events':'none'});
+  lines.forEach((line, i) => {
+    const ts = el('tspan', {x, dy: i===0 ? 0 : 13});
+    ts.textContent = line;
+    t.appendChild(ts);
+  });
+  t.setAttribute('x', x);
+  t.setAttribute('y', y - (lines.length-1)*6.5);
+  parent.appendChild(t);
+}
+
+// Outer color ring per area
+const defs = el('defs', {});
+svg.appendChild(defs);
+
+areas.forEach((area, ai) => {
+  const a1 = areaStart[ai], a2 = a1 + TAU/3;
+  const rp = el('path', {d: ringPath(a1,a2,R_outer+2,R_ring,0.015), fill: area.color});
+  svg.appendChild(rp);
+
+  // Curved text along arc at mid-radius of outer ring
+  const rLabel = R_outer + 12;
+  const arcId = 'arc-label-' + ai;
+
+  // For bottom arcs (areas 1 and 2), text reads left-to-right when going clockwise
+  // We draw the path from a1 to a2 (clockwise), text follows
+  const startA = a1 + 0.08;
+  const endA = a2 - 0.08;
+  const [sx, sy] = xy(startA, rLabel);
+  const [ex, ey] = xy(endA, rLabel);
+  const largeArc = (endA - startA) > Math.PI ? 1 : 0;
+
+  const arcPath2 = el('path', {
+    id: arcId,
+    d: `M${sx},${sy} A${rLabel},${rLabel},0,${largeArc},1,${ex},${ey}`,
+    fill: 'none', stroke: 'none'
+  });
+  defs.appendChild(arcPath2);
+
+  const label = area.label.join(' ');
+
+  // For area index 1 (Ressurser, bottom of wheel), flip the arc so text reads correctly
+  if (ai === 1) {
+    const flipId = arcId + '-flip';
+    const [fx, fy] = xy(endA, rLabel);
+    const [fx2, fy2] = xy(startA, rLabel);
+    const flipArc = el('path', {
+      id: flipId,
+      d: `M${fx},${fy} A${rLabel},${rLabel},0,${largeArc},0,${fx2},${fy2}`,
+      fill: 'none', stroke: 'none'
+    });
+    defs.appendChild(flipArc);
+    const txt2 = el('text', {'font-size':'10.5', 'font-weight':'700',
+      'font-family':'system-ui,-apple-system,sans-serif', fill:'#fff',
+      'pointer-events':'none'});
+    const tp2 = el('textPath', {href: '#' + flipId, startOffset:'50%', 'text-anchor':'middle'});
+    tp2.textContent = label;
+    txt2.appendChild(tp2);
+    svg.appendChild(txt2);
+  } else {
+    const txt = el('text', {'font-size':'10.5', 'font-weight':'700',
+      'font-family':'system-ui,-apple-system,sans-serif', fill:'#fff',
+      'pointer-events':'none'});
+    const tp = el('textPath', {href: '#' + arcId, startOffset:'50%', 'text-anchor':'middle'});
+    tp.textContent = label;
+    txt.appendChild(tp);
+    svg.appendChild(txt);
+  }
+});
+
+// Segments
+areas.forEach((area, ai) => {
+  area.segments.forEach((seg, si) => {
+    const a1 = areaStart[ai] + si * segAngle;
+    const a2 = a1 + segAngle;
+    const mid = a1 + segAngle/2;
+
+    const g = el('g', {class:'seg'});
+    g.dataset.title = seg.label.join(' ');
+    g.dataset.desc = seg.desc;
+    g.dataset.color = area.color;
+
+    const p = el('path', {
+      d: arcPath(a1,a2,R_inner+3,R_outer-2),
+      fill: area.colorLight,
+      stroke: area.color,
+      'stroke-width':'1.2',
+      class:'seg-fill'
+    });
+    g.appendChild(p);
+
+    const rText = R_inner + (R_outer - R_inner)*0.52;
+    const [tx,ty] = xy(mid, rText);
+    addText(g, seg.label, tx, ty, {size:10.5, weight:700, fill:area.color});
+
+    g.addEventListener('click', () => {
+      document.querySelectorAll('.seg').forEach(s=>s.classList.remove('active'));
+      g.classList.add('active');
+      document.getElementById('ip-title').textContent = seg.label.join(' ');
+      document.getElementById('ip-title').style.color = area.color;
+      document.getElementById('ip-desc').textContent = seg.desc;
+      document.getElementById('info-panel').style.borderColor = area.color;
+    });
+
+    svg.appendChild(g);
+  });
+});
+
+// Inner colored rings (solid with white label)
+areas.forEach((area, ai) => {
+  const a1 = areaStart[ai], a2 = a1+TAU/3;
+  const rp = el('path', {d: ringPath(a1,a2,0,R_inner+2,0.02), fill:area.color, opacity:'0.88'});
+  svg.appendChild(rp);
+  const midA = a1 + TAU/6;
+  const [lx2,ly2] = xy(midA, R_inner*0.56);
+  addText(svg, area.label, lx2, ly2, {size:8.5, weight:700, fill:'#fff'});
+});
+
+// Center circle
+const c = el('circle',{cx,cy,r:R_inner-1,fill:'#fff',stroke:'#d0cdc5','stroke-width':'1.5'});
+svg.appendChild(c);
+addText(svg,['Entrepre-'],cx,cy-16,{size:12.5,weight:600,fill:'#222'});
+addText(svg,['nørielle'],cx,cy,{size:12.5,weight:600,fill:'#222'});
+addText(svg,['ferdigheter'],cx,cy+16,{size:12.5,weight:600,fill:'#222'});
+</script>
+</body>
+</html>
